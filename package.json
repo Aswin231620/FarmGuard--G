@@ -4,6 +4,7 @@
     "description": "FarmGuard Biosecurity Portal - Full Stack Application",
     "scripts": {
         "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+        "build": "cd client && npm install && npm run build",
         "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
         "dev-server": "cd server && npm run dev",
         "dev-client": "cd client && npm run dev",
