@@ -19,7 +19,11 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize SQLite Database
-const dbPath = path.join(__dirname, 'farmguard.db');
+// On Vercel, we must use /tmp for write access, but it is ephemeral!
+const isVercel = process.env.VERCEL;
+const dbDir = isVercel ? '/tmp' : __dirname;
+const dbPath = path.join(dbDir, 'farmguard.db');
+
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Database connection error:', err.message);
@@ -218,6 +222,10 @@ app.post('/api/compliance', authenticateToken, (req, res) => {
     );
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
