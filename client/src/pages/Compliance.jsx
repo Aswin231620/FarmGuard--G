@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import { getCompliance, updateCompliance } from '../services/firestoreService';
+
 import {
     ClipboardCheck,
     CheckCircle2,
@@ -33,9 +34,9 @@ const Compliance = () => {
     useEffect(() => {
         const fetchCompliance = async () => {
             try {
-                const res = await api.get('/compliance');
+                const data = await getCompliance();
                 const statusMap = {};
-                res.data.forEach(item => {
+                data.forEach(item => {
                     statusMap[item.item_id] = !!item.status;
                 });
                 setStatus(statusMap);
@@ -56,7 +57,7 @@ const Compliance = () => {
         setSaving(true);
         try {
             const promises = Object.keys(status).map(id =>
-                api.post('/compliance', { item_id: id, status: status[id] })
+                updateCompliance(id, status[id])
             );
             await Promise.all(promises);
             alert('Compliance ledger updated.');

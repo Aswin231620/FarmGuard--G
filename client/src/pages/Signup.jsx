@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import { auth } from '../firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { ShieldPlus, User, Mail, Lock } from 'lucide-react';
 
 const Signup = () => {
@@ -12,11 +13,16 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
         try {
-            await api.post('/auth/signup', formData);
-            navigate('/login');
+            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            await updateProfile(userCredential.user, {
+                displayName: formData.name
+            });
+            navigate('/');
         } catch (err) {
-            setError(err.response?.data?.error || 'Signup failed');
+            console.error(err);
+            setError(err.message || 'Signup failed');
         } finally {
             setLoading(false);
         }

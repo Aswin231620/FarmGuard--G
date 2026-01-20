@@ -68,7 +68,7 @@ const Sidebar = ({ user, logout, isMobileOpen, setMobileOpen, theme, toggleTheme
                                 <User size={20} />
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                                <p className="text-sm" style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</p>
+                                <p className="text-sm" style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.displayName}</p>
                                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Premium Farmer</p>
                             </div>
                         </div>

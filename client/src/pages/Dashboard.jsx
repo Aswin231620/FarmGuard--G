@@ -22,7 +22,7 @@ import {
     AlertCircle,
     ShieldCheck
 } from 'lucide-react';
-import api from '../services/api';
+import { getAlerts, getAssessmentHistory } from '../services/firestoreService';
 
 const Dashboard = () => {
     const [alerts, setAlerts] = useState([]);
@@ -34,16 +34,16 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [alertsRes, historyRes] = await Promise.all([
-                    api.get('/alerts'),
-                    api.get('/assessment/history')
+                const [alertsData, historyData] = await Promise.all([
+                    getAlerts(),
+                    getAssessmentHistory()
                 ]);
-                setAlerts(alertsRes.data);
-                setHistory(historyRes.data.map(h => ({ ...h, score: parseInt(h.score) })).reverse());
-                if (historyRes.data.length > 0) {
+                setAlerts(alertsData);
+                setHistory(historyData.map(h => ({ ...h, score: parseInt(h.score) })).reverse());
+                if (historyData.length > 0) {
                     setStats({
-                        risk: historyRes.data[0].risk_level,
-                        score: historyRes.data[0].score
+                        risk: historyData[0].risk_level,
+                        score: historyData[0].score
                     });
                 }
             } catch (err) {

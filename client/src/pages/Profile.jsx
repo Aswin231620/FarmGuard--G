@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import { getProfile, updateProfile, getAssessmentHistory } from '../services/firestoreService';
+
 import { User, MapPin, Gauge, Save, Info, ChevronRight, Sparkles, LayoutDashboard } from 'lucide-react';
 
 const Profile = () => {
@@ -15,19 +16,19 @@ const Profile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const [profileRes, historyRes] = await Promise.all([
-                    api.get('/profile'),
-                    api.get('/assessment/history')
+                const [profileData, historyData] = await Promise.all([
+                    getProfile(),
+                    getAssessmentHistory()
                 ]);
 
-                if (Object.keys(profileRes.data).length > 0) {
-                    setProfile(profileRes.data);
+                if (profileData) {
+                    setProfile(profileData);
                 }
 
-                if (historyRes.data.length > 0) {
+                if (historyData.length > 0) {
                     setStats({
-                        risk: historyRes.data[0].risk_level,
-                        score: historyRes.data[0].score
+                        risk: historyData[0].risk_level,
+                        score: historyData[0].score
                     });
                 }
             } catch (err) {
@@ -42,7 +43,7 @@ const Profile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/profile', profile);
+            await updateProfile(profile);
             setMsg('Profile configuration saved.');
             setTimeout(() => setMsg(''), 3000);
         } catch (err) {

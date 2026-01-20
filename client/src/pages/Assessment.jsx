@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import api from '../services/api';
+import { submitAssessment as firestoreSubmitAssessment } from '../services/firestoreService';
+
 import {
     ShieldAlert,
     CheckCircle2,
@@ -36,10 +37,18 @@ const Assessment = () => {
     };
 
     const submitAssessment = async () => {
+        const score = Object.values(responses).reduce((a, b) => a + (b === 'yes' ? 10 : 0), 0);
+        let risk_level = 'High';
+        if (score > 70) risk_level = 'Low';
+        else if (score > 40) risk_level = 'Medium';
+
+        const date = new Date().toLocaleDateString();
+
         try {
-            const res = await api.post('/assessment', { responses });
-            setResult(res.data);
+            await firestoreSubmitAssessment(responses, score, risk_level);
+            setResult({ score, risk_level, date });
         } catch (err) {
+            console.error(err);
             alert('Error submitting assessment');
         }
     };

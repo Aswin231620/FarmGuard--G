@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { ShieldCheck, Mail, Lock, ArrowRight } from 'lucide-react';
 
-const Login = ({ login }) => {
+const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -14,11 +15,11 @@ const Login = ({ login }) => {
         setLoading(true);
         setError('');
         try {
-            const res = await api.post('/auth/login', formData);
-            login(res.data.user, res.data.token);
+            await signInWithEmailAndPassword(auth, formData.email, formData.password);
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.error || 'Authentication failed');
+            console.error(err);
+            setError(err.message || 'Authentication failed');
         } finally {
             setLoading(false);
         }

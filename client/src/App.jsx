@@ -11,6 +11,9 @@ import Signup from './pages/Signup';
 import { Menu, X, Sun, Moon } from 'lucide-react';
 import './index.css';
 
+import { auth } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,12 +21,21 @@ function App() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // You can fetch additional user data from Firestore here if needed
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName || 'Farmer'
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -35,19 +47,16 @@ function App() {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
-  const login = (userData, token) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', token);
-    setUser(userData);
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setMobileMenuOpen(false);
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
-  if (loading) return <div className="loading-screen">Loading...</div>;
+  if (loading) return <div className="loading-screen">Loading FarmGuard...</div>;
 
   return (
     <Router>
@@ -90,7 +99,7 @@ function App() {
 
         <main className="main-content">
           <Routes>
-            <Route path="/login" element={!user ? <Login login={login} /> : <Navigate to="/" />} />
+            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
             <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
 
             <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
